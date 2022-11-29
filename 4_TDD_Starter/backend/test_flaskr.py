@@ -14,7 +14,7 @@ class BookTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "bookshelf_test"
+        self.database_name = "bookshelf"
         self.database_path = "postgresql://{}:{}@{}/{}".format(
             "student", "student", "localhost:5432", self.database_name
         )
@@ -100,7 +100,26 @@ class BookTestCase(unittest.TestCase):
         res = self.client().post("/books", json=self.new_book)
         data = json.loads(res.data)
         pass
+    
+    def test_get_book_search_with_results(self):
+        res = self.client().post("/books", json={"search": "Novel"})
+        data = json.loads(res.data)
+        print("res")
+        print(data)
+        print("res")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertTrue(data["total_books"])
+        self.assertEqual(len(data["books"]), 3)
 
+    def test_get_book_search_without_results(self):
+        res = self.client().post("/books", json={"search": "applejacks"})
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data["success"], True)
+        self.assertEqual(data["total_books"], 0)
+        self.assertEqual(len(data["books"]), 0)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
